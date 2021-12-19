@@ -1,15 +1,14 @@
 package tasks;
 
+import common.ApiPersonDto;
 import common.Area;
 import common.Person;
 import common.Task;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /*
 Имеются
@@ -23,7 +22,28 @@ public class Task6 implements Task {
   private Set<String> getPersonDescriptions(Collection<Person> persons,
                                             Map<Integer, Set<Integer>> personAreaIds,
                                             Collection<Area> areas) {
-    return new HashSet<>();
+    // создаем хэш-таблицу, чтобы получать название региона по id региона
+    Map<Integer, String> areaTable = new HashMap<Integer, String>();
+
+    // добавляем все пары id - name из коллекции регионов в хэш-таблицу
+    for (Area a : areas) {
+      areaTable.put(a.getId(), a.getName());
+    }
+
+    Set<String> resultList =
+                    //создаем поток из списка персон:
+            persons.stream()
+                    // оператору flatMap мы будем отдавать потоки строк вида "Имя - регион",
+                    // каждый такой поток создается для отдельного объекта Person:
+                    // Сначала получаем id объекта Person,
+                    // затем по нему из словаря personAreaIds получаем множество id регионов,
+                    // из которого создаем поток id обрабатываемый оператором map для получения строк "Имя - регион"
+            .flatMap(p-> personAreaIds.get(p.getId()).stream().
+                    map(id -> String.format("%s - %s", p.getFirstName(), areaTable.get(id))))
+                    // Собираем HashSet на выходе из потока
+            .collect(Collectors.toSet());
+
+    return resultList;
   }
 
   @Override

@@ -7,6 +7,8 @@ import common.Vacancy;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /*
 Из коллекции компаний необходимо получить всевозможные различные названия вакансий
@@ -14,7 +16,12 @@ import java.util.Set;
 public class Task7 implements Task {
 
   private Set<String> vacancyNames(Collection<Company> companies) {
-    return new HashSet<>();
+
+    return companies.stream()               // создаем поток из коллекциии компаний
+            .map(Company::getVacancies)     // из объекта Company извлекаем Set<Vacancy>
+            .flatMap(Collection::stream)    // отдаем flatMap потоки созданные из Set<Vacancy>
+            .map(Vacancy::getTitle)         // из каждого объекта вакансии получаем ее название
+            .collect(Collectors.toSet());   // Собираем HashSet на выходе из потока
   }
 
   @Override

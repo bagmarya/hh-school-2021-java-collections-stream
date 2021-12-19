@@ -6,7 +6,9 @@ import common.Task;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /*
 Задача 3
@@ -16,7 +18,26 @@ public class Task3 implements Task {
 
   // !!! Редактируйте этот метод !!!
   private List<Person> sort(Collection<Person> persons) {
-    return new ArrayList<>(persons);
+
+//Сначала, в надежде на то что сортировка устойчива, сделала так (и это сработало):
+//    List<Person> sortedPersonList = persons.stream()
+//            .sorted(Comparator.comparing(Person::getCreatedAt))
+//            .sorted(Comparator.comparing(Person::getSecondName))
+//            .sorted(Comparator.comparing(Person::getFirstName))
+//            .collect(Collectors.toList());
+
+    // Создаем компоратор для наших условий сортировки
+    Comparator<Person> compareByName = Comparator
+            .comparing(Person::getFirstName)
+            .thenComparing(Person::getSecondName)
+            .thenComparing(Person::getCreatedAt);
+
+    // Из входного списка создаем стрим и сортируем его с помощью нашего компоратора. Собираем в список
+    List<Person> sortedPersonList = persons.stream()
+            .sorted(compareByName)
+            .collect(Collectors.toList());
+
+    return sortedPersonList;
   }
 
   @Override

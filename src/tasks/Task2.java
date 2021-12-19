@@ -4,10 +4,7 @@ import common.Person;
 import common.Task;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /*
@@ -22,7 +19,24 @@ public class Task2 implements Task {
   private static List<Person> combineAndSortWithLimit(Collection<Person> persons1,
                                                       Collection<Person> persons2,
                                                       int limit) {
-    return new ArrayList<>();
+
+    // Создаем пустой список и дополняем его объектами Person из обеих входных коллекций
+    ArrayList<Person> persons = new ArrayList<Person>();
+    persons.addAll(persons1);
+    persons.addAll(persons2);
+
+    // Для получения итогового списка, который нам нужно вернуть:
+    // создаем стрим из объединенного на предыдущем шаге списка,
+    // сортируем его по дате создания,
+    // ограничиваем число элементов на выходе входным значением limit
+    // и собираем в список.
+    List<Person> limitedSortedList = persons.stream()
+            .sorted(Comparator.comparing(Person::getCreatedAt))
+            .limit(limit)
+            .collect(Collectors.toList());
+
+
+    return limitedSortedList;
   }
 
   @Override
