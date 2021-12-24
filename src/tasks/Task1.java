@@ -4,9 +4,7 @@ import common.Person;
 import common.PersonService;
 import common.Task;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /*
@@ -21,7 +19,15 @@ public class Task1 implements Task {
   // !!! Редактируйте этот метод !!!
   private List<Person> findOrderedPersons(List<Integer> personIds) {
     Set<Person> persons = PersonService.findPersons(personIds);
-    return Collections.emptyList();
+
+    // создаем хэш-таблицу для наших объектов Person, используя id как ключ (линейное время)
+    Map<Integer, Person> personsTable = persons.stream().
+            collect(Collectors.toMap(Person::getId, person -> person));
+
+    // Создаем поток айдишников из исходного списка, добываем по ним из словаря персоу, и складываем ее в список.
+    return personIds.stream().
+            map(personsTable::get).
+            collect(Collectors.toList());
   }
 
   @Override
