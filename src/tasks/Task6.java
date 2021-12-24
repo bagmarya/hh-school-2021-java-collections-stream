@@ -22,17 +22,13 @@ public class Task6 implements Task {
   private Set<String> getPersonDescriptions(Collection<Person> persons,
                                             Map<Integer, Set<Integer>> personAreaIds,
                                             Collection<Area> areas) {
-    // создаем хэш-таблицу, чтобы получать название региона по id региона
-    Map<Integer, String> areaTable = new HashMap<Integer, String>();
+    // создаем хэш-таблицу из пар (id - name), чтобы получать название региона по id региона
+    Map<Integer, String> areaTable = areas.stream().
+            collect(Collectors.toMap(Area::getId, Area::getName));
 
-    // добавляем все пары id - name из коллекции регионов в хэш-таблицу
-    for (Area a : areas) {
-      areaTable.put(a.getId(), a.getName());
-    }
 
-    Set<String> resultList =
                     //создаем поток из списка персон:
-            persons.stream()
+    return persons.stream()
                     // оператору flatMap мы будем отдавать потоки строк вида "Имя - регион",
                     // каждый такой поток создается для отдельного объекта Person:
                     // Сначала получаем id объекта Person,
@@ -42,8 +38,6 @@ public class Task6 implements Task {
                     map(id -> String.format("%s - %s", p.getFirstName(), areaTable.get(id))))
                     // Собираем HashSet на выходе из потока
             .collect(Collectors.toSet());
-
-    return resultList;
   }
 
   @Override

@@ -75,16 +75,12 @@ public class Task8 implements Task {
   public static String convertPersonToString(Person person) {
     //  Логичнее этот метод в классе Person поместить, я думаю.
     //  Непонятно зачем два раза SecondName вписывать - вначале и вконце, да еще проверять два раза?
-    //  Глядя на конструктор класса Person замечаю что FirstName не может не быть, а SecondName и MiddleName опциональны
-    //  Получаем по одному значению для имени, фамилии и отчества соответственно
-    //  (если фамилия или отчество не указаны, то присваиваем пустую строку)
-    //  При сборке строки из переменных с помощью join,
-    //  отсутствие фамилии или отчества могут превратиться в лишний пробел,
-    //  подрежем с помощью trim().
-    String firstName = person.getFirstName();
-    String secondName = person.getSecondName() != null? person.getSecondName() : "";
-    String middleName = person.getMiddleName() != null? person.getMiddleName() : "";
-    return String.join(" ", secondName, firstName, middleName).trim();
+    //  Создаем стрим из нужных нам строк,
+    //  убираем те, которые null или пустые
+    //  и объединяем в одну строку.
+    return Stream.of(person.getSecondName(), person.getFirstName(), person.getMiddleName())
+            .filter(str-> str != null && str.length() > 0)
+            .collect(Collectors.joining());
   }
 
 /*
@@ -105,15 +101,10 @@ public class Task8 implements Task {
     // map - тоже не говорящее имя для переменной, но поскольку используется только здесь, а метод маленький, то все понятно
     // Во вторых, зачем словарю такой маленький начальный размер, не понятно, он же будет расширяться после первого же элемента
     // и вряд ли мы будем обрабатывать такие маленькие объемы данных.
-    // В третьих, после 'new HashMap', по моему, положено указывать, что за словарь создаем: 'HashMap<Integer, String>()'
-    // В остальном вроде все хорошо.
-    Map<Integer, String> map = new HashMap<Integer, String>();
-    for (Person person : persons) {
-      if (!map.containsKey(person.getId())) {
-        map.put(person.getId(), convertPersonToString(person));
-      }
-    }
-    return map;
+    // Убираем из потока повторяющиеся элементы и собираем в словарь (id - строка с полным именем)
+    return persons.stream()
+            .distinct()
+            .collect(Collectors.toMap(Person::getId, Task8::convertPersonToString));
   }
 
 /*
@@ -130,36 +121,12 @@ public class Task8 implements Task {
     return has;
   }
  */
+
   public static boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
-    // Во первых, переменная has лишняя, вернуть булево значение через return можно прямо из тела цикла,
-    // как только условие выполнится первый раз (вместо 'has = true;' написать 'return true'),
-    // если же цикл отработал и совпадений не нашел, после цикла написать 'return false'
-    // Во вторых, время работы алгоритма квадратично и можно сделать быстрее.
-    // Здесь встают вопросы, могут ли быть одинаковые id у двух различных Person,
-    // и могут ли быть разные Person с одинаковым id в одной из коллекций persons1 или persons2?
-    // Если могут:
-    // Сначала создаем словарь, где будут содержаться списки всех персон с одинаковым id из первой коллекции
-    Map<Integer, List<Person>> mapPersons1 = new HashMap<Integer, List<Person>>();
-    for (Person person1 : persons1) {
-      Integer id = person1.getId();
-      if (!mapPersons1.containsKey(id)) {
-        mapPersons1.put(id, new ArrayList<Person>());
-      }
-      mapPersons1.get(id).add(person1);
-    }
-    // Потом перебираем вторую коллекцию по одной персоне, и если ее id есть среди ключей словаря,
-    // то уже сравниваем сию персону с персонами из соответствующего списка:
-    for (Person person2 : persons2) {
-      if (!mapPersons1.containsKey(person2.getId())) { continue; }
-      for (Person person1 : mapPersons1.get(person2.getId())) {
-        if (person1.equals(person2)) {return true;}
-      }
-    }
-    return false;
+    Set<Person> setOfPersons2 = new HashSet<>(persons2);
+    return persons1.stream().anyMatch(setOfPersons2::contains);
   }
-  // Ну а если не могут быть одинаковые id у двух различных Person то нам и метод equals такой сложный не нужен бы был.
-  // Тогда можно получить множество неповторяющихся id из каждой коллекции и объединить их в одно множество,
-  // посмотрев, меньше ли его размер чем сумма размеров исходных.
+
 
 /*
   //...
@@ -171,9 +138,9 @@ public class Task8 implements Task {
 */
   // Метод принимает поток целых чисел и возращает количество четных в этом потоке.
   public long countEven(Stream<Integer> numbers) {
-    // Во первых, непонятно, зачем переменная count объявлена в классе а не в методе, где используется.
-    // Во вторых, можно обойтись без нее, метод count() возвращает количество элементов в потоке данных:
+    // Метод count() возвращает количество элементов в потоке данных:
     return numbers.filter(num -> num % 2 == 0).count();
+    // Меньше строк, более читаемый код, нет лишних переменных, должно работать быстрее.
   }
 
 

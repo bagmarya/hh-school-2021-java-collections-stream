@@ -21,16 +21,13 @@ public class Task5 implements Task {
 
   // !!! Редактируйте этот метод !!!
   private List<ApiPersonDto> convert(List<Person> persons, Map<Integer, Integer> personAreaIds) {
+    //создаем поток из списка персон:
+    return persons.stream()
+    // конвертируем каждый объект Person в ApiPersonDto, передавая в конвертор вторым
+    // параметром id региона полученный по id текущего обрабатываемого элемента:
+    .map(person -> convert(person, personAreaIds.get(person.getId())))
+    .collect(Collectors.toList());
 
-    List<ApiPersonDto> resultList =
-            //создаем поток из списка персон:
-            persons.stream()
-            // конвертируем каждый объект Person в ApiPersonDto, передавая в конвертор вторым
-            // параметром id региона полученный по id текущего обрабатываемого элемента:
-            .map(p -> convert(p, personAreaIds.get(p.getId())))
-            .collect(Collectors.toList());
-
-    return resultList;
   }
 
   private static ApiPersonDto convert(Person person, Integer areaId) {

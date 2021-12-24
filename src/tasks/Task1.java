@@ -20,25 +20,14 @@ public class Task1 implements Task {
   private List<Person> findOrderedPersons(List<Integer> personIds) {
     Set<Person> persons = PersonService.findPersons(personIds);
 
-    // создаем хэш-таблицу для наших объектов Person, чтобы находить их за константное время по id
-    Map<Integer, Person> personsTable = new HashMap<Integer, Person>();
+    // создаем хэш-таблицу для наших объектов Person, используя id как ключ (линейное время)
+    Map<Integer, Person> personsTable = persons.stream().
+            collect(Collectors.toMap(Person::getId, person -> person));
 
-    // проходим по несортированному Set<Person>  и добавляем каждый объект в хэш-таблицу (каждый за О(1)),
-    // в качестве ключа - id (линейное время)
-    for (Person p : persons) {
-      personsTable.put(p.getId(), p);
-    }
-
-    // создаем список, в который будем добавлять объекты Person в нужном нам порядке
-    ArrayList<Person> personsOrderedList = new ArrayList<Person>();
-
-    // проходим по исходному списку с id искомых объектов, извлекая каждый объект Person из таблицы (каждый за О(1) )
-    // и помещая в список (каждый за О(1)) в том же порядке, что и переданные id. (линейное время)
-    for (Integer Id : personIds) {
-      personsOrderedList.add(personsTable.get(Id));
-    }
-    // В целом - время линейное.
-    return personsOrderedList;
+    // Создаем поток айдишников из исходного списка, добываем по ним из словаря персоу, и складываем ее в список.
+    return personIds.stream().
+            map(personsTable::get).
+            collect(Collectors.toList());
   }
 
   @Override
